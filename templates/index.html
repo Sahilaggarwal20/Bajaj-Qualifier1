@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Input Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center">API Input Form</h2>
+    <form id="apiForm">
+        <div class="form-group">
+            <label for="jsonInput">Enter JSON Input:</label>
+            <textarea class="form-control" id="jsonInput" rows="5" placeholder='{"data": ["M", "1", "334", "4", "B", "Z", "a"]}' required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="filterSelect">Filter By:</label>
+            <label for="filterSelect">(Use ctrl+click to multiselect)</label>
+            <select class="form-control" id="filterSelect" multiple>
+                <option value="alphabets">Alphabets</option>
+                <option value="numbers">Numbers</option>
+                <option value="highest_lowercase_alphabet">Highest Lowercase Alphabet</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="submitForm()">Submit</button>
+    </form>
+
+    <div id="resultContainer" class="mt-4">
+        <h4>Response:</h4>
+        <pre id="response"></pre>
+    </div>
+    <div class="">
+        <p>Operation Code: {{ operation_code.operation_code }}</p>
+    </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Script to handle form submission and GET request -->
+<script>
+    function submitForm() {
+        const jsonInput = document.getElementById('jsonInput').value;
+        const filterSelect = document.getElementById('filterSelect');
+        const selectedFilters = Array.from(filterSelect.selectedOptions).map(option => option.value);
+
+        try {
+            // Parse JSON input to validate it
+            const parsedInput = JSON.parse(jsonInput);
+
+            // Replace with your actual API URL
+            const apiUrl = 'http://127.0.0.1:5000/bfhl';
+
+            // Send POST request to the API
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(parsedInput),
+            })
+            .then(response => response.json())
+            .then(data => {
+                let filteredData = {};
+
+                // Filter data based on dropdown selection
+                if (selectedFilters.includes('alphabets')) {
+                    filteredData.alphabets = data.alphabets;
+                }
+                if (selectedFilters.includes('numbers')) {
+                    filteredData.numbers = data.numbers;
+                }
+                if (selectedFilters.includes('highest_lowercase_alphabet')) {
+                    filteredData.highest_lowercase_alphabet = data.highest_lowercase_alphabet;
+                }
+
+                // Display the filtered data in the result container
+                document.getElementById('response').textContent = JSON.stringify(filteredData, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            });
+        } catch (e) {
+            document.getElementById('response').textContent = 'Invalid JSON input';
+        }
+    }
+
+   </script>
+
+</body>
+</html>
